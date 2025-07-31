@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head><title>Chat Home</title></head>
+<body>
+    <h2>Enter Chat Room</h2>
+    <form action="" method="get">
+        <input type="text" id="room-name-input" placeholder="Enter room name" required>
+        <button onclick="enterRoom()">Enter</button>
+    </form>
+
+    <script>
+        function enterRoom() {
+            const room = document.getElementById("room-name-input").value;
+            window.location.href = "/chat/" + room + "/";
+        }
+    </script>
+</body>
+</html>

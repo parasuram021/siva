@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chat Room</title>
+    <style>
+        body {
+            background-color: #ece5dd;
+            font-family: Arial;
+        }
+
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        .chat-header {
+            background-color: #075E54;
+            color: white;
+            padding: 15px;
+            font-size: 18px;
+        }
+
+        .chat-box {
+            flex: 1;
+            padding: 10px;
+            overflow-y: auto;
+            background-color: #e5ddd5;
+        }
+
+        .message {
+            max-width: 60%;
+            margin: 8px;
+            padding: 10px;
+            border-radius: 10px;
+            font-size: 14px;
+        }
+
+        .sent {
+            background-color: #DCF8C6;
+            text-align: right;
+            align-self: flex-end;
+        }
+
+        .received {
+            background-color: white;
+            text-align: left;
+            align-self: flex-start;
+        }
+
+        .time {
+            font-size: 11px;
+            color: gray;
+            margin-top: 5px;
+            display: block;
+        }
+
+        .chat-input {
+            display: flex;
+            padding: 10px;
+            background-color: #f0f0f0;
+        }
+
+        #chat-message-input {
+            flex: 1;
+            padding: 10px;
+            border-radius: 20px;
+            border: none;
+        }
+
+        #chat-message-submit {
+            padding: 10px 20px;
+            border-radius: 20px;
+            background-color: #128C7E;
+            color: white;
+            border: none;
+            margin-left: 10px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">Chat Room: {{ room_name }}</div>
+
+        <div id="chat-log" class="chat-box"></div>
+
+        <div class="chat-input">
+            <input id="chat-message-input" placeholder="Type a message" />
+            <button id="chat-message-submit">Send</button>
+        </div>
+    </div>
+
+    <script>
+        const username = prompt("Enter your name:");
+        const roomName = "{{ room_name }}";
+
+        const chatSocket = new WebSocket(
+            'ws://' + window.location.host + '/ws/chat/' + roomName + '/'
+        );
+
+        chatSocket.onmessage = function(e) {
+            const data = JSON.parse(e.data);
+            console.log("Message from server:", data);
+
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('message');
+            messageDiv.classList.add(data.username === username ? 'sent' : 'received');
+
+            messageDiv.innerHTML = `${data.message}<br><span class="time">${data.time}</span>`;
+            document.querySelector('#chat-log').appendChild(messageDiv);
+            document.querySelector('#chat-log').scrollTop = document.querySelector('#chat-log').scrollHeight;
+        };
+
+        document.querySelector('#chat-message-submit').onclick = function() {
+            const input = document.querySelector('#chat-message-input');
+            const message = input.value;
+            if (message.trim() !== "") {
+                chatSocket.send(JSON.stringify({
+                    'message': message,
+                    'username': username
+                }));
+                input.value = '';
+            }
+        };
+    </script>
+</body>
+</html>
